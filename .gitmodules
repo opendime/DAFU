@@ -1,0 +1,6 @@
+[submodule "deps/usb"]
+	path = deps/usb
+	url = https://github.com/opendime/USB-XMEGA.git
+[submodule "deps/sam0"]
+	path = deps/sam0
+	url = https://github.com/avrxml/sam0.git

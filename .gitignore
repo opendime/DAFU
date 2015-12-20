@@ -1,0 +1,10 @@
+*.o
+.tags
+
+# targets
+dafu.elf
+dafu.hex
+dafu.bin
+dafu.sym
+dafu.lss
+dafu.o
