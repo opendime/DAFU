@@ -19,9 +19,9 @@ SIZE = arm-none-eabi-size
 # Basename of targets
 TARGET_NAME = dafu
 
-# Hardware configuration. Not so critical.
+# Hardware configuration. Not so critical. I suspect binary would not change
+# for any value here in the D21 family.
 PART = SAMD21J18A
-FLASH_TOTAL_SIZE = (256*1024)
 
 # Compiler flags.
 CFLAGS = -Wall --std=gnu99 -Os -g3 \
@@ -34,7 +34,7 @@ CFLAGS += \
 			-D USB_VENDOR_ID=0x1209 \
 			-D USB_MANUFACTURER_STR='"Nobody"' \
 			-D USB_PRODUCT_STR='"DAFU Bootloader"' \
-			-D COPYRIGHT_NOTE='"Visit https://githib.com/opendime/dafu"'
+			-D COPYRIGHT_NOTE='"Visit https://githib.com/opendime/DAFU"'
 
 # Header file search path
 PRJ_PATH = deps
@@ -58,6 +58,7 @@ C_SRCS = \
 			main.c \
 			usb.c \
 			common/clock.c \
+			my_customizations.c \
 			deps/usb/class/dfu/dfu.c \
 			deps/usb/samd/usb_samd.c \
 			deps/usb/usb_requests.c

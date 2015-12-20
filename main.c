@@ -22,6 +22,17 @@ const char copyright_note[] = COPYRIGHT_NOTE;
 
 volatile bool exit_and_jump = 0;
 
+// set at runtime
+uint32_t total_flash_size;
+
+// Board customization. You may define these functions in another file
+// and that new code will replace the stubs defined here.
+void board_setup_early(void) __attribute__((weak, alias("noopFunction")));
+void board_setup_late(void) __attribute__((weak, alias("noopFunction")));
+void board_reset_cleanup(void) __attribute__((weak, alias("noopFunction")));
+bool button_pressed(void) __attribute__((weak));
+
+
 /*** SysTick ***/
 
 volatile uint32_t g_msTicks;
@@ -80,15 +91,23 @@ void noopFunction(void)
 	// Placeholder function for code that isn't needed. Keep empty!
 }
 
-void board_setup_early(void) __attribute__((weak, alias("noopFunction")));
-void board_setup_late(void) __attribute__((weak, alias("noopFunction")));
-void board_reset_cleanup(void) __attribute__((weak, alias("noopFunction")));
+static void hardware_detect(void)
+{
+	// what kind of chip are we installed on?
+	// .. don't care
 
+	// how big is the flash tho
+	uint16_t page_size = 1 << (NVMCTRL->PARAM.bit.PSZ + 3);
+
+	total_flash_size = NVMCTRL->PARAM.bit.NVMP * page_size;
+}
 
 void bootloader_main()
 {
 	// Hook here for very early hardware init that some boards need
 	board_setup_early();
+
+	hardware_detect();
 
 	clock_init_usb(GCLK_SYSTEM);
 	init_systick();
@@ -116,7 +135,7 @@ void bootloader_main()
 	delay_ms(100);
 
 	// Hook: undo any special setup that board_setup_late might be needed to
-	// hide the fact the bootloader ran.
+	// undo the setup the bootloader code has done.
 	board_reset_cleanup();
 
 	jump_to_flash(FLASH_FW_ADDR, 0);
@@ -131,7 +150,6 @@ bool flash_valid() {
 			&& ip <  0x00400000;
 }
 
-bool button_pressed(void) __attribute__((weak));
 
 bool button_pressed(void)
 {

@@ -168,7 +168,8 @@ void Reset_Handler(void)
         pDest = &_srelocate;
 
 #if 0
-		See link-script.ld which makes sure we don't need this.
+		// See link-script.ld which makes sure we dont need this.
+
         if (pSrc != pDest) {
                 for (; pDest < &_erelocate;) {
                         *pDest++ = *pSrc++;
