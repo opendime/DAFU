@@ -118,4 +118,4 @@ debug:
 	@echo OBJS = $(OBJS)
 
 tags:
-	ctags -f .tags *.[ch] -R sam0 usb common
+	ctags -f .tags *.[ch] -R deps/sam0 deps/usb common

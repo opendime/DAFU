@@ -167,11 +167,14 @@ void Reset_Handler(void)
         pSrc = &_etext;
         pDest = &_srelocate;
 
+#if 0
+		See link-script.ld which makes sure we don't need this.
         if (pSrc != pDest) {
                 for (; pDest < &_erelocate;) {
                         *pDest++ = *pSrc++;
                 }
         }
+#endif
 
         /* Clear the zero segment */
         for (pDest = &_szero; pDest < &_ezero;) {

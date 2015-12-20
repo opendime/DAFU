@@ -75,15 +75,27 @@ void dfu_cb_manifest(void) {
 	exit_and_jump = 1;
 }
 
+void noopFunction(void)
+{
+	// Placeholder function for code that isn't needed. Keep empty!
+}
+
+void board_setup_early(void) __attribute__((weak, alias("noopFunction")));
+void board_setup_late(void) __attribute__((weak, alias("noopFunction")));
+void board_reset_cleanup(void) __attribute__((weak, alias("noopFunction")));
+
+
 void bootloader_main()
 {
-	// TODO: add hook here for very early hardware init that some boards need
+	// Hook here for very early hardware init that some boards need
+	board_setup_early();
 
 	clock_init_usb(GCLK_SYSTEM);
 	init_systick();
 	nvm_init();
 
-	// TODO: add hook here for "early" hardware init that some boards need
+	// Hook here for "early" hardware init that some boards need
+	board_setup_late();
 
 	__enable_irq();
 
@@ -103,6 +115,10 @@ void bootloader_main()
 
 	delay_ms(100);
 
+	// Hook: undo any special setup that board_setup_late might be needed to
+	// hide the fact the bootloader ran.
+	board_reset_cleanup();
+
 	jump_to_flash(FLASH_FW_ADDR, 0);
 }
 
@@ -115,15 +131,19 @@ bool flash_valid() {
 			&& ip <  0x00400000;
 }
 
-bool button_pressed() {
-#if 0
-	pin_in(PIN_BTN);
-	return !pin_read(PIN_BTN);
-#endif
+bool button_pressed(void) __attribute__((weak));
+
+bool button_pressed(void)
+{
+	// Repalce this function (in another file) if you want to 
+	// test for a pin or button being pressed during boot time
+	// to get into DFU mode.
 	return false;
 }
 
-bool bootloader_sw_triggered() {
+bool bootloader_sw_triggered()
+{
+	// Was reset caused by watchdog timer (WDT)?
 	return PM->RCAUSE.reg & PM_RCAUSE_WDT;
 }
 
