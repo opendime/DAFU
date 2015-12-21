@@ -1,6 +1,7 @@
 // Board customization.
 //
 // Enable any of these function if you need more or different setup code.
+// Placeholder version of same functions already weak-linked.
 //
 #include <stdbool.h>
 
@@ -34,3 +35,4 @@ bool button_pressed(void)
 	return false;
 }
 #endif
+

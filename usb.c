@@ -11,6 +11,10 @@
 #include "usb.h"
 #include "samd/usb_samd.h"
 
+// Return a ptr to a descriptor, perhaps made with usb_string_to_descriptor()
+// that contains a unique serial number for this board.
+void* get_serial_number_string_descriptor();
+
 USB_ENDPOINTS(1);
 
 const USB_DeviceDescriptor device_descriptor = {
@@ -147,7 +151,7 @@ uint16_t usb_cb_get_descriptor(uint8_t type, uint8_t index, const uint8_t** ptr)
 					address = usb_string_to_descriptor(USB_PRODUCT_STR);
 					break;
 				case 0x03:
-					address = samd_serial_number_string_descriptor();
+					address = get_serial_number_string_descriptor();
 					break;
 				case 0x10:
 					address = usb_string_to_descriptor("Flash");
@@ -225,3 +229,68 @@ bool usb_cb_set_interface(uint16_t interface, uint16_t altsetting) {
 	}
 	return false;
 }
+
+// Return a string descriptor containing a unique serial number.
+//
+void *get_serial_number_string_descriptor()
+{
+#if 0
+	char buf[27];
+
+	const unsigned char* id = (unsigned char*) 0x0080A00C;
+	for (int i=0; i<26; i++) {
+		unsigned idx = (i*5)/8;
+		unsigned pos = (i*5)%8;
+		unsigned val = ((id[idx] >> pos) | (id[idx+1] << (8-pos))) & ((1<<5)-1);
+		buf[i] = "0123456789ABCDFGHJKLMNPQRSTVWXYZ"[val];
+	}
+	buf[26] = 0;
+#endif
+
+	//
+	// Read and save the device serial number as normal Base32.
+	//
+
+	// Documented in section 9.3.3 of D21 datasheet, page 32 (rev G), but no header file, 
+	// these are not contiguous addresses.
+	const uint32_t	*ser[4] = {
+		 	(uint32_t *)0x0080A00C, 
+			(uint32_t *)0x0080A040, (uint32_t *)0x0080A044, (uint32_t *)0x0080A048 };
+
+	uint32_t copy[4];
+	copy[0] = *ser[0];
+	copy[1] = *ser[1];
+	copy[2] = *ser[2];
+	copy[3] = *ser[3];
+
+	uint8_t *tmp = (uint8_t *)copy;
+
+	int count = 0;
+    int next = 1;
+	int buffer = tmp[0];
+    int bitsLeft = 8;
+
+	const int length = 16;
+	char buf[27];
+
+	while(bitsLeft > 0 || next < length) {
+		if(bitsLeft < 5) {
+			if(next < length) {
+				buffer <<= 8;
+				buffer |= tmp[next++] & 0xff;
+				bitsLeft += 8;
+			} else {
+				int pad = 5 - bitsLeft;
+				buffer <<= pad;
+				bitsLeft += pad;
+			}
+		}
+		bitsLeft -= 5;
+		int index = (buffer >> bitsLeft) & 0x1f;
+		buf[count++] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"[index];
+	}
+	buf[count] = 0;
+
+	return usb_string_to_descriptor(buf);
+}
+
