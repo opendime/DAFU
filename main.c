@@ -165,10 +165,11 @@ bool bootloader_sw_triggered()
 	return PM->RCAUSE.reg & PM_RCAUSE_WDT;
 }
 
-int main() {
+int main_bl() {
 	if (!flash_valid() || button_pressed() || bootloader_sw_triggered()) {
 		bootloader_main();
 	}
 
 	jump_to_flash(FLASH_FW_ADDR, 0);
+	return 0;
 }
