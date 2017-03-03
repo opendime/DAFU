@@ -138,7 +138,11 @@ void bootloader_main()
 	// undo the setup the bootloader code has done.
 	board_reset_cleanup();
 
+#ifdef USE_CORE_RESET
 	jump_to_flash(FLASH_FW_ADDR, 0);
+#elif
+	NVIC_SystemReset();
+#endif
 }
 
 bool flash_valid() {
