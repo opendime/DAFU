@@ -34,7 +34,8 @@ CFLAGS += \
 			-D USB_VENDOR_ID=0x1209 \
 			-D USB_MANUFACTURER_STR='"Nobody"' \
 			-D USB_PRODUCT_STR='"DAFU Bootloader"' \
-			-D COPYRIGHT_NOTE='"Visit https://githib.com/opendime/DAFU"'
+			-D COPYRIGHT_NOTE='"Visit https://githib.com/opendime/DAFU"' \
+			-D USE_CORE_RESET
 
 # Header file search path
 PRJ_PATH = deps

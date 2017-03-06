@@ -49,7 +49,7 @@ void delay_ms(unsigned ms) {
 	}
 }
 
-void init_systick() {
+void init_systick(void) {
 	if (SysTick_Config(48000000 / 1000)) {	/* Setup SysTick Timer for 1 msec interrupts  */
 		while (1) {}								/* Capture error */
 	}
@@ -102,7 +102,7 @@ static void hardware_detect(void)
 	total_flash_size = NVMCTRL->PARAM.bit.NVMP * page_size;
 }
 
-void bootloader_main()
+void bootloader_main(void)
 {
 	// Hook here for very early hardware init that some boards need
 	board_setup_early();
@@ -138,7 +138,11 @@ void bootloader_main()
 	// undo the setup the bootloader code has done.
 	board_reset_cleanup();
 
+#ifdef USE_CORE_RESET
 	jump_to_flash(FLASH_FW_ADDR, 0);
+#elif
+	NVIC_SystemReset();
+#endif
 }
 
 bool flash_valid() {
@@ -159,13 +163,13 @@ bool button_pressed(void)
 	return false;
 }
 
-bool bootloader_sw_triggered()
+bool bootloader_sw_triggered(void)
 {
 	// Was reset caused by watchdog timer (WDT)?
 	return PM->RCAUSE.reg & PM_RCAUSE_WDT;
 }
 
-int main() {
+void main_bl(void) {
 	if (!flash_valid() || button_pressed() || bootloader_sw_triggered()) {
 		bootloader_main();
 	}
