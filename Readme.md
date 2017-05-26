@@ -35,8 +35,8 @@ Steps:
 
 Get the submodules. This will populate `deps/sam0` and `deps/usb`
 
-	git submodules init
-	git submodules update
+	git submodule init
+	git submodule update
 
 To build, run make:
 
